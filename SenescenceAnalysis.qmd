@@ -40,8 +40,9 @@ rawdata <- read.csv("N_C_Data.csv", header = T)
 Here below we go through several data cleaning steps.
 
 ```{r}
-#| echo: false
-2 * 2
+# use dplyr to "select" only the columns we need (ID, c and n weight percent)
+
+# use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
