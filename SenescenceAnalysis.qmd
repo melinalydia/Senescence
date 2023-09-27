@@ -27,17 +27,17 @@ theme:
 
 ## Data description
 
-[MELINA: describe the data and how it was collected here (basically the first part of your methods)]
+\[MELINA: describe the data and how it was collected here (basically the first part of your methods)\]
 
-## Running Code
+## Data Import and Cleaning
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+First we import all carbon and nitrogen content data from leaves pre- and post-drought.
 
 ```{r}
-1 + 1
+rawdata <- read.csv("N_C_Data.csv", header = T)
 ```
 
-You can add options to executable code like this
+Here below we go through several data cleaning steps.
 
 ```{r}
 #| echo: false
