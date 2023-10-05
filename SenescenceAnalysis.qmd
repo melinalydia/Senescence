@@ -40,9 +40,18 @@ rawdata <- read.csv("N_C_Data.csv", header = T)
 Here below we go through several data cleaning steps.
 
 ```{r}
+# instal dplr 
+instal(dplyr)
 # use dplyr to "select" only the columns we need (ID, c and n weight percent)
+library(dplyr)
+"selected_data" <- rawdata %>%
++     select( ends_with("_p"), matches("Samp_ID"))
+> view(selected_data)
 
 # use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
+filtered_data <- selected_data %>%
++     filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf")))
+
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
