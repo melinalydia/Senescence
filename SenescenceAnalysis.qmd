@@ -53,6 +53,18 @@ selected_data <- rawdata %>%
 #  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf")))
 # above code doesn't remove all extra data, leaves 731 obs. 
 
+# try filtering to only include those with *GREEN* *DRY* *DEAD*
+# Eliminate everything BUT samples with *ALLE* and *VILL*
+# Try converting DRY to DEAD (or visa versa)
+# Split the Sample ID column so we have a true sample ID column and a separate green_dry column
+
+## later: 
+# Try using reshape from dplyr to get all data from one sample onto one row
+# Create a new column with 'mutate' from 'dplyr' that applies the senescence eqation to the leaf N data
+
 ```
+
+\
+\
 
 The `echo: false` option disables the printing of code (only output is displayed).
