@@ -45,46 +45,41 @@ library(dplyr)
 selected_data <- rawdata %>%
   select(Samp_ID, ends_with("_p"))
 
-
-# To view data, run: view(selected_data)
-
+# To view data, run: View(selected_data)
 # use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
-# not filtering out everything - need to remove all Apple* Oregano* capsule*
-#filtered_data <- selected_data %>%
-#  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf")))
-# above code doesn't remove all extra data, leaves 731 obs. 
+# instal stringer first to use str_detect 
 
+filtered_data <- selected_data %>%
+  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf"))) %>%
+  filter(!(Samp_ID %in% c("Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>%
 
-rinsed_data <- filtered_data3 %>%
-  filter(!(Samp_ID %in% c("oregano 1", "Apple leaves", "apple leaf")))
-
- rinsed_data <- filtered_data3 %>%
-   filter(!(Samp_ID %in% c("oregano 1", "Apple leaves", "apple leaf")))
-
-
-selected_data2 <- filtered_data3 %>%
-  filter(!(Samp_ID %in% c("Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7")))
-
-
-# try filtering to only include those with *GREEN* *DRY* *DEAD*
-# Eliminate everything BUT samples with *ALLE* and *VILL*
-
+#leaves 691 entries 
+#try filtering to only include those with *GREEN* *DRY* *DEAD*
+#add with tha pipe "%>%"
 library(stringr)
-useful_data <- selected_data2 %>%
+
   filter(str_detect(Samp_ID, "DRY|DEAD|GREEN"))
 
-
-useful_data2 <- useful_data %>%
+# Eliminate everything BUT samples with *ALLE* and *VILL*
+#add with tha pipe "%>%"
+  
   filter(!str_detect(Samp_ID, "^(165|251|168|169)"))
 
-#leads to 110 entries
+#should look like: 
+  
+filtered_data <- selected_data %>%
+  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf"))) %>%
+  filter(!(Samp_ID %in% c("Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>%
+  filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) %>%
+  filter(!str_detect(Samp_ID, "^(165|251|168|169)"))
 
+#this leaves 107 entries 
 # Try converting DRY to DEAD (or visa versa). 
 
-useful_data <- useful_data2 %>%
+named_right_data <- filtered_data %>%
   mutate(Samp_ID = gsub("DRY", "DEAD", Samp_ID))
 
-# Split the Sample ID column so we have a true sample ID column and a separate green_dry column
+# Split the Sample ID column so we have a true sample ID column and a separate green_dead column
 
 install.packages("tidyr") 
 library(tidyr)
