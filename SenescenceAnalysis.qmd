@@ -41,22 +41,18 @@ Here below we go through several data cleaning steps.
 
 ```{r}
 # use dplyr to "select" only the columns we need (ID, c and n weight percent)
-library(dplyr)
+library(dplyr) # load dplyr
 selected_data <- rawdata %>%
   select(Samp_ID, ends_with("_p"))
 
 # To view data, run: View(selected_data)
-# use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
-# instal stringer first to use str_detect 
 
-filtered_data <- selected_data %>%
-  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf"))) %>%
-  filter(!(Samp_ID %in% c("Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>%
+# install stringer first to use str_detect 
+library(stringr)
 
-#leaves 691 entries 
 #try filtering to only include those with *GREEN* *DRY* *DEAD*
 #add with tha pipe "%>%"
-library(stringr)
+
 
   filter(str_detect(Samp_ID, "DRY|DEAD|GREEN"))
 
@@ -68,12 +64,13 @@ library(stringr)
 #should look like: 
   
 filtered_data <- selected_data %>%
-  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf"))) %>%
-  filter(!(Samp_ID %in% c("Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>%
+  # use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
+  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf","Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>% # leaves 691 entries 
+  # us str_detect... MELINA finish cleaning
   filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) %>%
   filter(!str_detect(Samp_ID, "^(165|251|168|169)"))
 
-#this leaves 107 entries 
+# this leaves 107 entries 
 # Try converting DRY to DEAD (or visa versa). 
 
 named_right_data <- filtered_data %>%
@@ -81,10 +78,11 @@ named_right_data <- filtered_data %>%
 
 # Split the Sample ID column so we have a true sample ID column and a separate green_dead column
 
-install.packages("tidyr") 
 library(tidyr)
-useful_data2 <- useful_data %>%
-  separate(Samp_ID, into = c("Green", "DRY"), sep = " ", remove = FALSE, extra = "drop")
+test <- named_right_data %>%
+  separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = FALSE)
+
+test$ID <- substr(test$ID, 1, nchar(test$ID)-1)
 
 ## later: 
 # Try using reshape from dplyr to get all data from one sample onto one row
