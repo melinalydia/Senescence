@@ -37,7 +37,7 @@ First we import all carbon and nitrogen content data from leaves pre- and post-d
 rawdata <- read.csv("N_C_Data.csv", header = T)
 ```
 
-Here below we go through several data cleaning steps.
+Below, we go through several data cleaning steps for a subset of the C and N data, focusing on differences just between C and N absorption from leaves during drought.
 
 ```{r}
 # use dplyr to "select" only the columns we need (ID, c and n weight percent)
@@ -50,39 +50,31 @@ selected_data <- rawdata %>%
 # install stringer first to use str_detect 
 library(stringr)
 
-#try filtering to only include those with *GREEN* *DRY* *DEAD*
-#add with tha pipe "%>%"
-
-
-  filter(str_detect(Samp_ID, "DRY|DEAD|GREEN"))
-
-# Eliminate everything BUT samples with *ALLE* and *VILL*
-#add with tha pipe "%>%"
-  
-  filter(!str_detect(Samp_ID, "^(165|251|168|169)"))
-
-#should look like: 
-  
+# filter out unneeded rows
 filtered_data <- selected_data %>%
-  # use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
-  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf","Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>% # leaves 691 entries 
-  # us str_detect... MELINA finish cleaning
+  # us str_detect to only include rows with 'GREEN', 'DRY' or 'DEAD' in Samp_ID
   filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) %>%
-  filter(!str_detect(Samp_ID, "^(165|251|168|169)"))
-
+  # Only include rows with ALLE and VILL
+  filter(str_detect(Samp_ID, "ALLE|VILL"))
 # this leaves 107 entries 
-# Try converting DRY to DEAD (or visa versa). 
-
+  
+# removed code because redundant with step selecting rows with green/dry/dead:
+# use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
+#  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf","Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>% # leaves 691 entries 
+  
+# Convert DRY to DEAD (or visa versa). 
 named_right_data <- filtered_data %>%
   mutate(Samp_ID = gsub("DRY", "DEAD", Samp_ID))
 
 # Split the Sample ID column so we have a true sample ID column and a separate green_dead column
-
+## STOP - not working because naming not consistent (not always a "-" separating ID from GREEN v DEAD)
 library(tidyr)
-test <- named_right_data %>%
+clean_long <- named_right_data %>%
   separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = FALSE)
-
-test$ID <- substr(test$ID, 1, nchar(test$ID)-1)
+# remove tailing "-" from new ID
+clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
+# print dataframe to ensure matching IDs for GREEN and DEAD.
+write.csv(clean_long, "clean_long_C_N_subset.csv", row.names = FALSE)
 
 ## later: 
 # Try using reshape from dplyr to get all data from one sample onto one row
@@ -91,6 +83,8 @@ test$ID <- substr(test$ID, 1, nchar(test$ID)-1)
 ```
 
 \
-\
+Below is Julia's code for combining and cleaning all C and N data
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+
+```
