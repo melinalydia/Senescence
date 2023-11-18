@@ -31,10 +31,10 @@ theme:
 
 ## Data Import and Cleaning
 
-First we import all carbon and nitrogen content data from leaves pre- and post-drought.
+First we import the second batch of carbon and nitrogen content data from leaves pre- and post-drought.
 
 ```{r}
-rawdata <- read.csv("N_C_Data.csv", header = T)
+rawdata <- read.csv("N_C_Data2.csv", header = T)
 ```
 
 Below, we go through several data cleaning steps for a subset of the C and N data, focusing on differences just between C and N absorption from leaves during drought.
@@ -43,7 +43,7 @@ Below, we go through several data cleaning steps for a subset of the C and N dat
 # use dplyr to "select" only the columns we need (ID, c and n weight percent)
 library(dplyr) # load dplyr
 selected_data <- rawdata %>%
-  select(Samp_ID, ends_with("_p"))
+  select(info, Samp_ID, ends_with("_p"))
 
 # To view data, run: View(selected_data)
 
@@ -53,9 +53,9 @@ library(stringr)
 # filter out unneeded rows
 filtered_data <- selected_data %>%
   # us str_detect to only include rows with 'GREEN', 'DRY' or 'DEAD' in Samp_ID
-  filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) %>%
+  filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) #%>%
   # Only include rows with ALLE and VILL
-  filter(str_detect(Samp_ID, "ALLE|VILL"))
+#  filter(str_detect(Samp_ID, "ALLE|VILL"))
 # this leaves 107 entries 
   
 # removed code because redundant with step selecting rows with green/dry/dead:
@@ -67,12 +67,16 @@ named_right_data <- filtered_data %>%
   mutate(Samp_ID = gsub("DRY", "DEAD", Samp_ID))
 
 # Split the Sample ID column so we have a true sample ID column and a separate green_dead column
-## STOP - not working because naming not consistent (not always a "-" separating ID from GREEN v DEAD)
 library(tidyr)
 clean_long <- named_right_data %>%
-  separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = FALSE)
-# remove tailing "-" from new ID
+  separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = FALSE) %>% 
+  separate(info, into = c("temp", "dateplus"), sep = "(?<=_)(.*)", remove = FALSE) #%>% 
+  separate(dateplus, into = c("temp", "dateplus"), sep = "(?!.*_)(?<=_)", remove = FALSE)
+# remove tailing "-" from new ID and date 
 clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
+clean_long$date <- substr(clean_long$date, 1, nchar(clean_long$date)-1)
+
+# 
 # print dataframe to ensure matching IDs for GREEN and DEAD.
 write.csv(clean_long, "clean_long_C_N_subset.csv", row.names = FALSE)
 
