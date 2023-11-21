@@ -72,7 +72,8 @@ clean_long <- named_right_data %>%
   separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = T) %>% 
   separate(info, into = c("rm", "dateplus"), sep = "_", extra = "merge", remove = T) %>%
   separate(dateplus, into = c("date", "rm2"), sep = " ", remove = T) %>% 
-  mutate(species = case_when(
+  mutate(species = 
+           case_when(
     grepl("VILL", ID) ~ "VILL",
     grepl("ALLE", ID) ~ "ALLE",
     TRUE ~ "F3")) %>% 
@@ -82,7 +83,7 @@ clean_long <- named_right_data %>%
 clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
 
 # print dataframe to ensure matching IDs for GREEN and DEAD.
-write.csv(clean_long, "clean_long_C_N_subset.csv", row.names = FALSE)
+#write.csv(clean_long, "clean_long_C_N_subset.csv", row.names = FALSE)
 
 ## later: 
 # Try using reshape from dplyr to get all data from one sample onto one row
@@ -102,8 +103,7 @@ full_clean_wide <- full_clean %>%
     id_cols = c("species", "ID"),
     names_from = c("GREENvDEAD"),
     values_from = c("N_wght_p", "C_wght_p"),
-    names_sep = "_"
-  )
+    names_sep = "_")
 
 # Code I used to check for duplicates
 # full_clean %>%
@@ -114,7 +114,7 @@ full_clean_wide <- full_clean %>%
 
 ```{r} initial analysis}
 
-# INSTRUCITONS FOR MINA
+# INSTRUCITONS FOR MELINA
 # First, use the species column to filter for only "ALLE" and "VILL"
 
 # Next, use the mutate function from dplyr to calculate senescence based on the equation I sent, making a new column for the senescence value (maybe call it "sen" so we never have to type that out and risk misspelling it hahah)
