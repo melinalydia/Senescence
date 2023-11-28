@@ -80,7 +80,9 @@ clean_long <- named_right_data %>%
   select(species, ID, date, GREENvDEAD, ends_with("_p"))
 
 # remove tailing "-" from new ID 
+
 clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
+
 
 # print dataframe to ensure matching IDs for GREEN and DEAD.
 #write.csv(clean_long, "clean_long_C_N_subset.csv", row.names = FALSE)
@@ -94,8 +96,14 @@ clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
 Analysis and plotting!
 
 \`\`\`{r} import and clean full dataset} #Importing combined clean C and N data for plotting full_clean \<- read.csv("clean_long_C_N.csv", header = T)
+```{r}
+full_clean <- read.csv("clean_long_C_N.csv", header = T)
+```
 
 # pivot the data longer so there is just one row per ID with all data from both green and post dry-down dead leaves
+```{r}
+#full_clean_wide <- full_clean %\>% pivot_wider( id_cols = c("species", "ID"), names_from = c("GREENvDEAD"), values_from = c("N_wght_p", "C_wght_p"), names_sep = "\_")
+```
 
 full_clean_wide \<- full_clean %\>% pivot_wider( id_cols = c("species", "ID"), names_from = c("GREENvDEAD"), values_from = c("N_wght_p", "C_wght_p"), names_sep = "\_")
 
@@ -113,8 +121,31 @@ full_clean_wide \<- full_clean %\>% pivot_wider( id_cols = c("species", "ID"), n
 
 ```{r} initial analysis}
 
-# INSTRUCITONS FOR MELINA
+#INSTRUCITONS FOR MELINA
 # First, use the species column to filter for only "ALLE" and "VILL"
 
 # Next, use the mutate function from dplyr to calculate senescence based on the equation I sent, making a new column for the senescence value (maybe call it "sen" so we never have to type that out and risk misspelling it hahah)
 ```
+
+# changing the chr to numerical data for carbon and for ID 
+```{r}
+```{r}
+full_clean$C_wght_p <- as.numeric(full_clean$C_wght_p)
+str(full_clean)
+```
+
+```{r}
+#Implimenting calculation of nitrogen sen for IDs 
+```{r}
+sen_new <- full_clean %>%
+  group_by(ID) %>%
+  summarise(sen_nitro = (1 - (N_wght_p[GREENvDEAD == "DEAD"] / N_wght_p[GREENvDEAD == "GREEN"])) * 100) %>%
+  
+#this is my attempt to keep species with the data in sen_new however I did end up getting the values I just lost the rest of the columns 
+  ungroup() %>%
+  slice(1) %>%
+  mutate(species = full_clean$species)
+        
+```
+
+\
