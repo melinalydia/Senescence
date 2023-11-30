@@ -152,5 +152,3 @@ palette_check(c("#cc79a7",  "#56B4E9","#FFD700", "#50be73"), plot = TRUE)
 #t.test(sen_new$sen_nitro~sen_new$species, alternative = "two.sided")
 
 ```
-
-\
