@@ -95,29 +95,24 @@ clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
 
 Analysis and plotting!
 
-\`\`\`{r} import and clean full dataset} #Importing combined clean C and N data for plotting full_clean \<- read.csv("clean_long_C_N.csv", header = T)
 ```{r}
+#Importing combined clean C and N data for plotting
 full_clean <- read.csv("clean_long_C_N.csv", header = T)
-```
 
 # pivot the data longer so there is just one row per ID with all data from both green and post dry-down dead leaves
-```{r}
-#full_clean_wide <- full_clean %\>% pivot_wider( id_cols = c("species", "ID"), names_from = c("GREENvDEAD"), values_from = c("N_wght_p", "C_wght_p"), names_sep = "\_")
-```
-
-full_clean_wide \<- full_clean %\>% pivot_wider( id_cols = c("species", "ID"), names_from = c("GREENvDEAD"), values_from = c("N_wght_p", "C_wght_p"), names_sep = "\_")
+full_clean_wide <- full_clean %>%
+  pivot_wider(
+    id_cols = c("species", "ID"),
+    names_from = c("GREENvDEAD"),
+    values_from = c("N_wght_p", "C_wght_p"),
+    names_sep = "_")
 
 # Code I used to check for duplicates
-
-# full_clean %\>%
-
-# group_by(species, ID, GREENvDEAD) %\>%
-
-# summarise(n = n(), .groups = "drop") %\>%
-
-# filter(n \> 1L)
-
-```         
+# full_clean %>%
+#      group_by(species, ID, GREENvDEAD) %>%
+#      summarise(n = n(), .groups = "drop") %>%
+#      filter(n > 1L)
+```       
 
 ```{r} initial analysis}
 
@@ -127,25 +122,28 @@ full_clean_wide \<- full_clean %\>% pivot_wider( id_cols = c("species", "ID"), n
 # Next, use the mutate function from dplyr to calculate senescence based on the equation I sent, making a new column for the senescence value (maybe call it "sen" so we never have to type that out and risk misspelling it hahah)
 ```
 
-# changing the chr to numerical data for carbon and for ID 
-```{r}
+# changing the chr to numerical data for carbon and for ID
+
 ```{r}
 full_clean$C_wght_p <- as.numeric(full_clean$C_wght_p)
 str(full_clean)
 ```
 
 ```{r}
-#Implimenting calculation of nitrogen sen for IDs 
-```{r}
+# Implimenting calculation of nitrogen sen for IDs 
 sen_new <- full_clean %>%
-  group_by(ID) %>%
-  summarise(sen_nitro = (1 - (N_wght_p[GREENvDEAD == "DEAD"] / N_wght_p[GREENvDEAD == "GREEN"])) * 100) %>%
+  group_by(ID, species) %>%
+  summarise(sen_nitro = (1 - (N_wght_p[GREENvDEAD == "DEAD"] / N_wght_p[GREENvDEAD == "GREEN"])) * 100) 
   
-#this is my attempt to keep species with the data in sen_new however I did end up getting the values I just lost the rest of the columns 
-  ungroup() %>%
-  slice(1) %>%
-  mutate(species = full_clean$species)
-        
+# Filter for just alle or vill 
+# Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
+
+
+# check colors with https://cran.r-project.org/web/packages/colorblindcheck/vignettes/intro-to-colorblindcheck.html
+# example colorblind code check:library(colorblindcheck)
+library(colorblindcheck)
+palette_check(c("#cc79a7",  "#56B4E9","#FFD700", "#50be73"), plot = TRUE)
+
 ```
 
 \
