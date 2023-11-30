@@ -144,6 +144,13 @@ sen_new <- full_clean %>%
 library(colorblindcheck)
 palette_check(c("#cc79a7",  "#56B4E9","#FFD700", "#50be73"), plot = TRUE)
 
+# T-test (complete after filtering for only alle and vill rows)
+
+# FILL IN LATER - need to test for normality
+# take difference between alle and vill - look at normality of difference with shapiro wilk test
+# Preliminary t test:
+#t.test(sen_new$sen_nitro~sen_new$species, alternative = "two.sided")
+
 ```
 
 \
