@@ -136,19 +136,42 @@ sen_new <- full_clean %>%
   summarise(sen_nitro = (1 - (N_wght_p[GREENvDEAD == "DEAD"] / N_wght_p[GREENvDEAD == "GREEN"])) * 100) 
   
 # Filter for just alle or vill 
+filtered_sen <- sen_new %>%
+  filter(species %in% c("ALLE", "VILL"))
 # Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
-
+library(ggplot2)
+plot_bg_color <- "#0B1664"
+panel_bg_color <- "#4E589A" 
+legend_box_color <- "#4E589A"
+text_color <- "#FFFFFF"
+custom_colors <- c("ALLE" = "#FFD700", "VILL" = "#50be73") 
+ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
+  geom_violin() +
+  scale_fill_manual(values = custom_colors) +
+  labs(title = "Nitrogen Reabsorbtion for Species",
+       x = "Species",
+       y = "Nitrogen Absorbed") +
+  theme(
+    plot.background = element_rect(fill = plot_bg_color),  
+    panel.background = element_rect(fill = panel_bg_color),
+    legend.background = element_rect(fill = legend_box_color),
+    legend.key = element_rect(fill = legend_box_color), 
+    text = element_text(color = text_color),
+    axis.text.x = element_text(color = text_color),
+    axis.text.y = element_text(color = text_color))
 
 # check colors with https://cran.r-project.org/web/packages/colorblindcheck/vignettes/intro-to-colorblindcheck.html
 # example colorblind code check:library(colorblindcheck)
 library(colorblindcheck)
-palette_check(c("#cc79a7",  "#56B4E9","#FFD700", "#50be73"), plot = TRUE)
+palette_check(c("#0B1664",  "#4E589A","#FFD700", "#50be73"), plot = TRUE)
 
-# T-test (complete after filtering for only alle and vill rows)
-
-# FILL IN LATER - need to test for normality
-# take difference between alle and vill - look at normality of difference with shapiro wilk test
 # Preliminary t test:
-#t.test(sen_new$sen_nitro~sen_new$species, alternative = "two.sided")
+t.test(filtered_sen$sen_nitro~filtered_sen$species, alternative = "two.sided")
+
+# Test for normality
+# take difference between alle and vill - look at normality of difference with shapiro wilk test
+shapiro_test <- by(filtered_sen$sen_nitro, filtered_sen$species, shapiro.test)
+print(shapiro_test)
+
 
 ```
