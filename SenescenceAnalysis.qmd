@@ -165,13 +165,23 @@ ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
 library(colorblindcheck)
 palette_check(c("#0B1664",  "#4E589A","#FFD700", "#50be73"), plot = TRUE)
 
-# Preliminary t test:
-t.test(filtered_sen$sen_nitro~filtered_sen$species, alternative = "two.sided")
-
 # Test for normality
 # take difference between alle and vill - look at normality of difference with shapiro wilk test
 shapiro_test <- by(filtered_sen$sen_nitro, filtered_sen$species, shapiro.test)
 print(shapiro_test)
 
+# Calculate percent difference
+(62.93173/26.32518)*100-100
 
+# Preliminary t test:
+t.test(filtered_sen$sen_nitro~filtered_sen$species, alternative = "two.sided")
+
+# look at data distribution
+VILL_hist <-filtered_sen %>% 
+  filter(species == "VILL") 
+hist(VILL_hist$sen_nitro, breaks = 20)
+
+ALLE_hist <-filtered_sen %>% 
+  filter(species == "ALLE") 
+hist(ALLE_hist$sen_nitro, breaks = 20)
 ```
