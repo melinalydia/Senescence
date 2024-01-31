@@ -140,17 +140,18 @@ filtered_sen <- sen_new %>%
   filter(species %in% c("ALLE", "VILL"))
 # Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
 library(ggplot2)
-plot_bg_color <- "#0B1664"
+plot_bg_color <- "#10174B"
 panel_bg_color <- "#4E589A" 
 legend_box_color <- "#4E589A"
 text_color <- "#FFFFFF"
 custom_colors <- c("ALLE" = "#FFD700", "VILL" = "#50be73") 
 ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
   geom_violin() +
+  stat_summary(fun = "mean", geom = "point", shape = 20, size = 3, color = "red", fill = "red") +
   scale_fill_manual(values = custom_colors) +
   labs(title = "Nitrogen Reabsorbtion for Species",
        x = "Species",
-       y = "Nitrogen Absorbed") +
+       y = "Percent Nitrogen Absorbed") +
   theme(
     plot.background = element_rect(fill = plot_bg_color),  
     panel.background = element_rect(fill = panel_bg_color),
@@ -163,7 +164,7 @@ ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
 # check colors with https://cran.r-project.org/web/packages/colorblindcheck/vignettes/intro-to-colorblindcheck.html
 # example colorblind code check:library(colorblindcheck)
 library(colorblindcheck)
-palette_check(c("#0B1664",  "#4E589A","#FFD700", "#50be73"), plot = TRUE)
+palette_check(c("#202D8C",  "#4E589A","#FFD700", "#50be73"), plot = TRUE)
 
 # Test for normality
 # take difference between alle and vill - look at normality of difference with shapiro wilk test
@@ -185,3 +186,53 @@ ALLE_hist <-filtered_sen %>%
   filter(species == "ALLE") 
 hist(ALLE_hist$sen_nitro, breaks = 20)
 ```
+
+
+
+```{r}
+# Carbon Data Analysis 
+
+Csen_new <- full_clean %>%
+  group_by(ID, species) %>%
+  summarise(sen_carbon = (1 - (C_wght_p[GREENvDEAD == "DEAD"] / C_wght_p[GREENvDEAD == "GREEN"])) * 100) 
+
+# filtered for ALLE and VILL only
+Cfiltered_sen <- Csen_new %>%
+  filter(species %in% c("ALLE", "VILL"))
+
+#Creation of Plot 
+plot_bg_color <- "#0B1664"
+panel_bg_color <- "#4E589A" 
+legend_box_color <- "#4E589A"
+text_color <- "#FFFFFF"
+custom_colors <- c("ALLE" = "#FFD700", "VILL" = "#50be73") 
+ggplot(Cfiltered_sen, aes(x = species, y = sen_carbon, fill = species)) +
+  geom_violin() +
+  scale_fill_manual(values = custom_colors) +
+  stat_summary(fun = "mean", geom = "point", shape = 20, size = 3, color = "red", fill = "red") +
+  labs(title = "Carbon Reabsorbtion for Species",
+       x = "Species",
+       y = "Percent Carbon Absorbed") +
+  theme(
+    plot.background = element_rect(fill = plot_bg_color),  
+    panel.background = element_rect(fill = panel_bg_color),
+    legend.background = element_rect(fill = legend_box_color),
+    legend.key = element_rect(fill = legend_box_color), 
+    text = element_text(color = text_color),
+    axis.text.x = element_text(color = text_color),
+    axis.text.y = element_text(color = text_color))
+
+
+# statistical analysis for Carbon
+shapiro_test <- by(Cfiltered_sen$sen_carbon, Cfiltered_sen$species, shapiro.test)
+print(shapiro_test) 
+
+
+#t-test
+t.test(Cfiltered_sen$sen_carbon~Cfiltered_sen$species, alternative = "two.sided")
+
+# Calculate percent difference
+(-0.6153434/-1.4358660)*100-100 #0.428 times more 
+
+```
+
