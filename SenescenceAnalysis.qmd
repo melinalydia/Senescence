@@ -99,7 +99,7 @@ Analysis and plotting!
 #Importing combined clean C and N data for plotting
 full_clean <- read.csv("clean_long_C_N.csv", header = T)
 
-# pivot the data longer so there is just one row per ID with all data from both green and post dry-down dead leaves
+# pivot the data wider so there is just one row per ID with all data from both green and post dry-down dead leaves
 full_clean_wide <- full_clean %>%
   pivot_wider(
     id_cols = c("species", "ID"),
