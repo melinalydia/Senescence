@@ -107,6 +107,8 @@ full_clean_wide <- full_clean %>%
     values_from = c("N_wght_p", "C_wght_p"),
     names_sep = "_")
 
+write.csv(full_clean_wide, "clean_wide_C_N.csv")
+
 # Code I used to check for duplicates
 # full_clean %>%
 #      group_by(species, ID, GREENvDEAD) %>%
@@ -235,4 +237,3 @@ t.test(Cfiltered_sen$sen_carbon~Cfiltered_sen$species, alternative = "two.sided"
 (-0.6153434/-1.4358660)*100-100 #0.428 times more 
 
 ```
-
