@@ -140,26 +140,22 @@ filtered_sen <- sen_new %>%
   filter(species %in% c("ALLE", "VILL"))
 # Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
 library(ggplot2)
-plot_bg_color <- "#10174B"
-panel_bg_color <- "#4E589A" 
-legend_box_color <- "#4E589A"
-text_color <- "#FFFFFF"
-custom_colors <- c("ALLE" = "#FFD700", "VILL" = "#50be73") 
-ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
+
+custom_colors <- c("ALLE" = "#009E73", "VILL" = "#E69F00") 
+nitrogenplot <- ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
   geom_violin() +
-  stat_summary(fun = "mean", geom = "point", shape = 20, size = 3, color = "red", fill = "red") +
-  scale_fill_manual(values = custom_colors) +
+    geom_boxplot(width = 0.1) +  # Add boxplot with outliers
+  scale_fill_manual(values = custom_colors, 
+                    labels = c(ALLE = expression(italic("C. allenii")), 
+                               VILL = expression(italic("C. villosissimus")))) +
   labs(title = "Nitrogen Reabsorbtion for Species",
        x = "Species",
-       y = "Percent Nitrogen Absorbed") +
-  theme(
-    plot.background = element_rect(fill = plot_bg_color),  
-    panel.background = element_rect(fill = panel_bg_color),
-    legend.background = element_rect(fill = legend_box_color),
-    legend.key = element_rect(fill = legend_box_color), 
-    text = element_text(color = text_color),
-    axis.text.x = element_text(color = text_color),
-    axis.text.y = element_text(color = text_color))
+       y = " % Percent Nitrogen Absorbed") +
+  theme_bw() +
+  guides(fill = guide_legend(override.aes = list(linetype = "blank")))
+
+ggsave("nitrogenplot.png", plot, width = 6, height = 4, units = "in", dpi = 300)
+   
 
 # check colors with https://cran.r-project.org/web/packages/colorblindcheck/vignettes/intro-to-colorblindcheck.html
 # example colorblind code check:library(colorblindcheck)
@@ -205,7 +201,7 @@ plot_bg_color <- "#0B1664"
 panel_bg_color <- "#4E589A" 
 legend_box_color <- "#4E589A"
 text_color <- "#FFFFFF"
-custom_colors <- c("ALLE" = "#FFD700", "VILL" = "#50be73") 
+custom_colors <- c("ALLE" = "#009E73", "VILL" = "#E69F00") 
 ggplot(Cfiltered_sen, aes(x = species, y = sen_carbon, fill = species)) +
   geom_violin() +
   scale_fill_manual(values = custom_colors) +
