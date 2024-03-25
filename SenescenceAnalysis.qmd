@@ -24,6 +24,10 @@ theme:
   #give dark option
   dark: darkly
 ---
+load necessary packages:
+```{r}
+library(dplyr) # load dplyr
+```
 
 ## Data description
 
@@ -101,7 +105,7 @@ full_clean <- read.csv("full_lf_n_wide.csv", header = TRUE)
 
 #to filter for ALLE and VILL and then create a species column 
 filtered_gnd <- full_clean %>%
-  filter(grepl("^ALLE|^VILL", ID)) +
+  filter(grepl("^ALLE|^VILL", ID)) %>% 
   mutate(Species = ifelse(grepl("^ALLE", ID), "ALLE",
                           ifelse(grepl("^VILL", ID), "VILL", NA)))
 
