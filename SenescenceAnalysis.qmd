@@ -34,54 +34,54 @@ theme:
 First we import the second batch of carbon and nitrogen content data from leaves pre- and post-drought.
 
 ```{r}
-rawdata <- read.csv("N_C_Data2.csv", header = T)
+# rawdata <- read.csv("N_C_Data2.csv", header = T)
 ```
 
 Below, we go through several data cleaning steps for a subset of the C and N data, focusing on differences just between C and N absorption from leaves during drought.
 
 ```{r}
 # use dplyr to "select" only the columns we need (ID, c and n weight percent)
-library(dplyr) # load dplyr
-selected_data <- rawdata %>%
-  select(info, Samp_ID, ends_with("_p"))
-
-# To view data, run: View(selected_data)
-
-# install stringer first to use str_detect 
-library(stringr)
-
-# filter out unneeded rows
-filtered_data <- selected_data %>%
-  # us str_detect to only include rows with 'GREEN', 'DRY' or 'DEAD' in Samp_ID
-  filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) #%>%
-  # Only include rows with ALLE and VILL
-#  filter(str_detect(Samp_ID, "ALLE|VILL"))
-# this leaves 107 entries 
-  
-# removed code because redundant with step selecting rows with green/dry/dead:
-# use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
-#  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf","Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>% # leaves 691 entries 
-  
-# Convert DRY to DEAD (or visa versa). 
-named_right_data <- filtered_data %>%
-  mutate(Samp_ID = gsub("DRY", "DEAD", Samp_ID))
-
-# Split the Sample ID column so we have a true sample ID column and a separate green_dead column
-library(tidyr)
-clean_long <- named_right_data %>%
-  separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = T) %>% 
-  separate(info, into = c("rm", "dateplus"), sep = "_", extra = "merge", remove = T) %>%
-  separate(dateplus, into = c("date", "rm2"), sep = " ", remove = T) %>% 
-  mutate(species = 
-           case_when(
-    grepl("VILL", ID) ~ "VILL",
-    grepl("ALLE", ID) ~ "ALLE",
-    TRUE ~ "F3")) %>% 
-  select(species, ID, date, GREENvDEAD, ends_with("_p"))
-
-# remove tailing "-" from new ID 
-
-clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
+# library(dplyr) # load dplyr
+# selected_data <- rawdata %>%
+#   select(info, Samp_ID, ends_with("_p"))
+# 
+# # To view data, run: View(selected_data)
+# 
+# # install stringer first to use str_detect 
+# library(stringr)
+# 
+# # filter out unneeded rows
+# filtered_data <- selected_data %>%
+#   # us str_detect to only include rows with 'GREEN', 'DRY' or 'DEAD' in Samp_ID
+#   filter(str_detect(Samp_ID, "DRY|DEAD|GREEN")) #%>%
+#   # Only include rows with ALLE and VILL
+# #  filter(str_detect(Samp_ID, "ALLE|VILL"))
+# # this leaves 107 entries 
+#   
+# # removed code because redundant with step selecting rows with green/dry/dead:
+# # use dplyr to "filter" out (remove) non-costus data rows (e.g. Bypass)
+# #  filter(!(Samp_ID %in% c("Atropine", "Bypass", "Blank","Apple leaf","Oregano 1", "Oregano 2", "Oregano 3", "Oregano 4", "Oregano 5", "Oregano 6", "Oregano 7", "Apple leaves", "apple leaf"))) %>% # leaves 691 entries 
+#   
+# # Convert DRY to DEAD (or visa versa). 
+# named_right_data <- filtered_data %>%
+#   mutate(Samp_ID = gsub("DRY", "DEAD", Samp_ID))
+# 
+# # Split the Sample ID column so we have a true sample ID column and a separate green_dead column
+# library(tidyr)
+# clean_long <- named_right_data %>%
+#   separate(Samp_ID, into = c("ID", "GREENvDEAD"), sep = "(?<=\\-)(?!.*\\-)", remove = T) %>% 
+#   separate(info, into = c("rm", "dateplus"), sep = "_", extra = "merge", remove = T) %>%
+#   separate(dateplus, into = c("date", "rm2"), sep = " ", remove = T) %>% 
+#   mutate(species = 
+#            case_when(
+#     grepl("VILL", ID) ~ "VILL",
+#     grepl("ALLE", ID) ~ "ALLE",
+#     TRUE ~ "F3")) %>% 
+#   select(species, ID, date, GREENvDEAD, ends_with("_p"))
+# 
+# # remove tailing "-" from new ID 
+# 
+# clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
 
 
 # print dataframe to ensure matching IDs for GREEN and DEAD.
@@ -96,24 +96,24 @@ clean_long$ID <- substr(clean_long$ID, 1, nchar(clean_long$ID)-1)
 Analysis and plotting!
 
 ```{r}
-#Importing combined clean C and N data for plotting
-full_clean <- read.csv("clean_long_C_N.csv", header = T)
+#Importing Nitrogen Data 
+full_clean <- read.csv("full_lf_n_wide.csv", header = TRUE) 
+
+#to filter for ALLE and VILL and then create a species column 
+filtered_gnd <- full_clean %>%
+  filter(grepl("^ALLE|^VILL", ID)) +
+  mutate(Species = ifelse(grepl("^ALLE", ID), "ALLE",
+                          ifelse(grepl("^VILL", ID), "VILL", NA)))
+
 
 # pivot the data wider so there is just one row per ID with all data from both green and post dry-down dead leaves
-full_clean_wide <- full_clean %>%
-  pivot_wider(
-    id_cols = c("species", "ID"),
-    names_from = c("GREENvDEAD"),
-    values_from = c("N_wght_p", "C_wght_p"),
-    names_sep = "_")
+# full_clean_wide <- full_clean %>%
+#   pivot_wider(
+#     id_cols = c("species", "ID"),
+#     names_from = c("GREENvDEAD"),
+#     values_from = c("N_wght_p", "C_wght_p"),
+#     names_sep = "_")
 
-write.csv(full_clean_wide, "clean_wide_C_N.csv")
-
-# Code I used to check for duplicates
-# full_clean %>%
-#      group_by(species, ID, GREENvDEAD) %>%
-#      summarise(n = n(), .groups = "drop") %>%
-#      filter(n > 1L)
 ```       
 
 ```{r} initial analysis}
@@ -127,24 +127,27 @@ write.csv(full_clean_wide, "clean_wide_C_N.csv")
 # changing the chr to numerical data for carbon and for ID
 
 ```{r}
-full_clean$C_wght_p <- as.numeric(full_clean$C_wght_p)
-str(full_clean)
+#full_clean$C_wght_p <- as.numeric(full_clean$C_wght_p)
+#str(full_clean)
+
+#invalid now ? 
 ```
 
 ```{r}
 # Implimenting calculation of nitrogen sen for IDs 
-sen_new <- full_clean %>%
+library(dplyr)
+sen_new <- filtered_gnd %>%
   group_by(ID, species) %>%
   summarise(sen_nitro = (1 - (N_wght_p[GREENvDEAD == "DEAD"] / N_wght_p[GREENvDEAD == "GREEN"])) * 100) 
   
 # Filter for just alle or vill 
-filtered_sen <- sen_new %>%
-  filter(species %in% c("ALLE", "VILL"))
+filtered_sen <- full_clean %>%
+  filter(ID %in% c("ALLE", "VILL"))
 # Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
 library(ggplot2)
 
 custom_colors <- c("ALLE" = "#009E73", "VILL" = "#E69F00") 
-nitrogenplot <- ggplot(filtered_sen, aes(x = species, y = sen_nitro, fill = species)) +
+nitrogenplot <- ggplot(filtered_gnd, aes(x = species, y = sen_nitro, fill = species)) +
   geom_violin() +
     geom_boxplot(width = 0.1) +  # Add boxplot with outliers
   scale_fill_manual(values = custom_colors, 
