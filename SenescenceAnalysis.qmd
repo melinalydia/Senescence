@@ -27,6 +27,7 @@ theme:
 load necessary packages:
 ```{r}
 library(dplyr) # load dplyr
+library(ggplot2)
 ```
 
 ## Data description
@@ -147,6 +148,8 @@ sen_new <- filtered_gnd %>%
 # Filter for just alle or vill 
 filtered_sen <- full_clean %>%
   filter(ID %in% c("ALLE", "VILL"))
+
+
 # Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
 library(ggplot2)
 
@@ -243,23 +246,21 @@ t.test(Cfiltered_sen$sen_carbon~Cfiltered_sen$species, alternative = "two.sided"
 
 #### Checking for (not) fully dried leaf bias
 ```{r}
-compiled <- read.csv("F3_alle_vill_compiled_traits.csv", header = T)
+# import data with carbon added
+compiled <- read.csv("F3_alle_vill_compiled_traits_2.csv", header = T)
 
+# filtered out cols we don't care about and the hybrids
 compiled <- compiled %>% 
-  select(type,N_wght_p_DEAD,date_end) %>% 
+  select(type,N_wght_p_GREEN,N_wght_p_DEAD,C_wght_p_GREEN,C_wght_p_DEAD) %>% 
   filter(type != "F3")
 
-compiled$date_end <- as.factor(compiled$date_end )
-
-compiled_alle <- compiled %>% filter(type == "ALLE")
-kruskal.test(compiled_alle$N_wght_p_DEAD ~ compiled_alle$date_end)
-
-hist(compiled_alle$N_wght_p_DEAD, breaks =20)
-
-partial_C_N <- read.csv("clean_wide_C_N.csv", header = T)
-
-partial_C_N <- partial_C_N %>% 
+# calculated the difference in C reabsorbed
+compiled_Creab <- compiled %>% 
   mutate(C_reabs = (1-(C_wght_p_DEAD/C_wght_p_GREEN))*100)
+
+# plot 
+ggplot(compiled_Creab,aes(x=type, y=C_diff)) +
+  geom_boxplot()
 
 ```
 
