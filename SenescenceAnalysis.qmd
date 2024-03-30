@@ -139,36 +139,6 @@ filtered_gnd <- full_clean %>%
 ```
 
 ```{r}
-# Implimenting calculation of nitrogen sen for IDs 
-library(dplyr)
-sen_new <- filtered_gnd %>%
-  group_by(ID, species) %>%
-  summarise(sen_nitro = (1 - (N_wght_p[GREENvDEAD == "DEAD"] / N_wght_p[GREENvDEAD == "GREEN"])) * 100) 
-  
-# Filter for just alle or vill 
-filtered_sen <- full_clean %>%
-  filter(ID %in% c("ALLE", "VILL"))
-
-
-# Make a violin plot with ggplot, species on x axis, sen_nitro on y axis - if you get a plot, play with the colors!
-library(ggplot2)
-
-custom_colors <- c("ALLE" = "#009E73", "VILL" = "#E69F00") 
-nitrogenplot <- ggplot(filtered_gnd, aes(x = species, y = sen_nitro, fill = species)) +
-  geom_violin() +
-    geom_boxplot(width = 0.1) +  # Add boxplot with outliers
-  scale_fill_manual(values = custom_colors, 
-                    labels = c(ALLE = expression(italic("C. allenii")), 
-                               VILL = expression(italic("C. villosissimus")))) +
-  labs(title = "Nitrogen Reabsorbtion for Species",
-       x = "Species",
-       y = " % Percent Nitrogen Absorbed") +
-  theme_bw() +
-  guides(fill = guide_legend(override.aes = list(linetype = "blank")))
-
-ggsave("nitrogenplot.png", plot, width = 6, height = 4, units = "in", dpi = 300)
-   
-
 # check colors with https://cran.r-project.org/web/packages/colorblindcheck/vignettes/intro-to-colorblindcheck.html
 # example colorblind code check:library(colorblindcheck)
 library(colorblindcheck)
@@ -246,6 +216,7 @@ t.test(Cfiltered_sen$sen_carbon~Cfiltered_sen$species, alternative = "two.sided"
 
 #### Checking for (not) fully dried leaf bias
 ```{r}
+#FINAL CARBON PLOT AND STATS CODE 
 # import data with carbon added
 compiled <- read.csv("F3_alle_vill_compiled_traits_2.csv", header = T)
 
@@ -259,8 +230,80 @@ compiled_Creab <- compiled %>%
   mutate(C_reabs = (1-(C_wght_p_DEAD/C_wght_p_GREEN))*100)
 
 # plot 
-ggplot(compiled_Creab,aes(x=type, y=C_diff)) +
-  geom_boxplot()
+#custom_colors <- c("ALLE" = "#009E73", "VILL" = "#E69F00") 
+  #ggplot(compiled_Creab,aes(x=type, y=C_reabs)) +
+  #geom_boxplot() +
+  #scale_fill_manual(values = custom_colors)
 
+custom_colors <- c("ALLE" = "#009E73", "VILL" = "#E69F00") 
+custom_labels <- c("ALLE" = "C. allenii", "VILL" = "C. villosissimus")
+
+C_Reab_plot <- ggplot(compiled_Creab, aes(x = type, y = C_reabs, fill = type)) +
+  geom_boxplot(color = "black") +
+  scale_fill_manual(values = custom_colors, labels = custom_labels) +
+  labs(x = "Species", y = "Carbon Reabsorption %", fill = "Species") +
+  theme_minimal() +  # Set a minimal theme
+  theme(
+    panel.background = element_rect(fill = "white"),
+    text = element_text(color = "black", size = 14),
+    axis.text.y = element_text(color = "black")
+  )
+ggsave("C_Reab_plot3.png", C_Reab_plot, width = 10, height = 6, units = "in")
+
+#STATISTICS
+
+```
+
+```{r}
+#FINAL NITROGEN PLOT AND STATS CODE
+
+compiled_Nreabs <- compiled %>% 
+  mutate(N_reabs = (1-(N_wght_p_DEAD/N_wght_p_GREEN))*100)
+
+#plot code 
+N_Reab_plot <- ggplot(compiled_Nreabs, aes(x = type, y = N_reabs, fill = type)) +
+  geom_violin(color = "black") +  # Create violin plot
+  geom_boxplot(width = 0.1, color = "black", fill = NA) +  # Overlay boxplot
+  scale_fill_manual(values = custom_colors, labels = custom_labels) +
+  labs(x = "Species", y = "Nitrogen Reabsorption %", fill = "Species") +
+  theme_minimal() +  # Set a minimal theme
+  theme(
+    panel.background = element_rect(fill = "white"),
+    text = element_text(color = "black", size = 14),
+    axis.text.y = element_text(color = "black")
+  )
+ggsave("N_Reab_plot2.png", N_Reab_plot, width = 10, height = 6, units = "in")
+
+#STATISTICS
+
+shapiro_test <- by(compiled_Nreabs$N_reabs, compiled_Nreabs$type, shapiro.test)
+print(shapiro_test)
+
+#compiled_Nreabs$type: ALLE
+#Shapiro-Wilk normality test
+#data:  dd[x, ]
+#W = 0.97937, p-value = 0.7243
+  #compiled_Nreabs$type: VILL
+	#Shapiro-Wilk normality test
+#data:  dd[x, ]
+#W = 0.91828, p-value = 0.01445
+
+# Preliminary t test:
+t.test(compiled_Nreabs$N_reabs~compiled_Nreabs$type, alternative = "two.sided")
+
+# Welch Two Sample t-test
+# 
+# data:  compiled_Nreabs$N_reabs by compiled_Nreabs$type
+# t = -14.669, df = 63.311, p-value < 2.2e-16
+# alternative hypothesis: true difference in means between group ALLE and group VILL is not equal to 0
+# 95 percent confidence interval:
+#  -38.04593 -28.92344
+# sample estimates:
+# mean in group ALLE mean in group VILL 
+#           35.71953           69.20421 
+
+# Calculate percent difference
+(69.20421/35.71953)*100-100
+# = 93.74334
 ```
 
